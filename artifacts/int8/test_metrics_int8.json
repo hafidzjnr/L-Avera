@@ -1,0 +1,52 @@
+{
+  "model": "tcresnet_int8",
+  "precision": "INT8",
+  "model_size_kb": 95.45,
+  "accuracy": 0.9423076923076923,
+  "macro_precision": 0.9534706331045003,
+  "macro_recall": 0.923076923076923,
+  "macro_f1": 0.9323612149699105,
+  "unhealthy_precision": 0.9473684210526315,
+  "unhealthy_recall": 1.0,
+  "unhealthy_f1": 0.972972972972973,
+  "per_class_report": {
+    "Healthy": {
+      "precision": 0.9130434782608695,
+      "recall": 1.0,
+      "f1-score": 0.9545454545454546,
+      "support": 21.0
+    },
+    "Noise": {
+      "precision": 1.0,
+      "recall": 0.7692307692307693,
+      "f1-score": 0.8695652173913043,
+      "support": 13.0
+    },
+    "Unhealthy": {
+      "precision": 0.9473684210526315,
+      "recall": 1.0,
+      "f1-score": 0.972972972972973,
+      "support": 18.0
+    },
+    "accuracy": 0.9423076923076923,
+    "macro avg": {
+      "precision": 0.9534706331045003,
+      "recall": 0.923076923076923,
+      "f1-score": 0.9323612149699105,
+      "support": 52.0
+    },
+    "weighted avg": {
+      "precision": 0.9466643196620311,
+      "recall": 0.9423076923076923,
+      "f1-score": 0.9396791516356734,
+      "support": 52.0
+    }
+  },
+  "class_order": [
+    "Healthy",
+    "Noise",
+    "Unhealthy"
+  ],
+  "test_original_file_count": 52,
+  "test_feature_count": 52
+}

@@ -1,0 +1,6 @@
+Model,Total Parameters,Trainable Parameters,File Size (KB)
+Baseline CNN,886979,886083,10457.6
+Compact CNN,413027,412579,4906.96
+DS-CNN,423163,422715,5029.27
+TC-ResNet8,65723,65067,929.5
+INT8,N/A,N/A,95.45

@@ -1,0 +1,114 @@
+# ==============================================================================
+# Python & Environment
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# ==============================================================================
+# Datasets & Media
+# ==============================================================================
+# Abaikan folder dataset dan file audio/arsip mentah yang berukuran besar
+Data/
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ==============================================================================
+# Model Weights & Large Binary Files
+# ==============================================================================
+# Model deep learning berukuran besar
+*.keras
+*.h5
+*.hdf5
+*.tflite
+*.pt
+*.pth
+*.onnx
+*.pb
+
+# Checkpoints & TensorBoard
+checkpoints/
+*.ckpt
+
+# ==============================================================================
+# Artifacts & Evaluation Tracking Exceptions
+# ==============================================================================
+# Pertahankan file konfigurasi, manifest split, dan metrik hasil evaluasi
+!artifacts/**/test_metrics*.json
+!artifacts/**/test_metrics.json
+!artifacts/**/split_manifest.csv
+!artifacts/**/dataset_manifest.csv
+!results/**
+
+# ==============================================================================
+# Logs & Temporary Files
+# ==============================================================================
+*.log
+*.tmp
+*.temp
+
+# ==============================================================================
+# IDEs & Code Editors
+# ==============================================================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ==============================================================================
+# Jupyter Notebooks
+# ==============================================================================
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# ==============================================================================
+# Operating System Files
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
