@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 import random
 
-import librosa
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -15,94 +14,14 @@ from sklearn.metrics import (
     precision_recall_fscore_support,
 )
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from tensorflow.keras.layers import (
-    BatchNormalization, Conv1D, Dense, Dropout, Flatten, MaxPooling1D,
-)
-from tensorflow.keras.models import Sequential
 
 from experiment.Baseline.config import (
     ARTIFACT_DIR, BATCH_SIZE, CLASSES, EPOCHS, EARLY_STOPPING_PATIENCE,
     LR_PATIENCE, MAX_FRAMES, MODEL_PATH, N_MFCC, RANDOM_SEED,
     SAMPLE_RATE, SPLIT_PATH,
 )
-
-
-def extract_mfcc(path: str, augment: bool = False, rng=None) -> np.ndarray:
-    audio, _ = librosa.load(path, sr=SAMPLE_RATE, mono=True)
-    if audio.size == 0:
-        raise ValueError(f"Empty audio: {path}")
-
-    if augment:
-        peak = float(np.max(np.abs(audio)))
-        if peak > 0:
-            if rng is None:
-                rng = np.random.default_rng(RANDOM_SEED)
-            scale = 0.005 * peak * float(rng.uniform(0.0, 1.0))
-            audio = np.clip(audio + scale * rng.normal(size=audio.shape), -1.0, 1.0)
-
-    mfcc = librosa.feature.mfcc(y=audio, sr=SAMPLE_RATE, n_mfcc=N_MFCC)
-    if mfcc.shape[1] < MAX_FRAMES:
-        mfcc = np.pad(
-            mfcc, ((0, 0), (0, MAX_FRAMES - mfcc.shape[1])), mode="constant"
-        )
-    else:
-        mfcc = mfcc[:, :MAX_FRAMES]
-    return mfcc.T.astype(np.float32)
-
-
-def make_arrays(frame: pd.DataFrame, training: bool):
-    rng = np.random.default_rng(RANDOM_SEED)
-    xs, ys = [], []
-    errors = []
-    for row in frame.itertuples(index=False):
-        try:
-            xs.append(extract_mfcc(row.path, augment=False))
-            ys.append(CLASSES.index(row.label))
-            # Generate augmentation only after original files have been split,
-            # and only for training records.
-            if training:
-                xs.append(extract_mfcc(row.path, augment=True, rng=rng))
-                ys.append(CLASSES.index(row.label))
-        except Exception as exc:
-            errors.append({"path": row.path, "label": row.label, "error": str(exc)})
-            print(f"[WARN] Skipping {row.path}: {exc}")
-
-    if errors:
-        pd.DataFrame(errors).to_csv(
-            ARTIFACT_DIR / "feature_extraction_errors.csv", index=False
-        )
-    if not xs:
-        raise RuntimeError("No audio features extracted for this split.")
-    return np.stack(xs), np.asarray(ys, dtype=np.int64)
-
-
-def build_model():
-    # Keep the original baseline's three convolution widths: 64, 128, 256.
-    model = Sequential([
-        tf.keras.layers.Input(shape=(MAX_FRAMES, N_MFCC)),
-        Conv1D(64, 3, activation="relu"),
-        BatchNormalization(),
-        MaxPooling1D(2),
-        Dropout(0.3),
-        Conv1D(128, 3, activation="relu"),
-        BatchNormalization(),
-        MaxPooling1D(2),
-        Dropout(0.3),
-        Conv1D(256, 3, activation="relu"),
-        BatchNormalization(),
-        MaxPooling1D(2),
-        Dropout(0.4),
-        Flatten(),
-        Dense(128, activation="relu"),
-        Dropout(0.4),
-        Dense(len(CLASSES), activation="softmax"),
-    ])
-    model.compile(
-        optimizer="adam",
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"],
-    )
-    return model
+from models.baseline_cnn import build_model
+from src.pipeline import make_arrays
 
 
 def main():
@@ -122,15 +41,26 @@ def main():
         raise ValueError("Train, validation, and test splits must all be non-empty.")
 
     print("Extracting training features; augmentation is train-only...")
-    x_train, y_train = make_arrays(train_df, training=True)
+    x_train, y_train = make_arrays(
+        train_df, CLASSES, SAMPLE_RATE, N_MFCC, MAX_FRAMES,
+        training=True, artifact_dir=ARTIFACT_DIR, random_seed=RANDOM_SEED,
+    )
     print("Extracting validation features without augmentation...")
-    x_val, y_val = make_arrays(val_df, training=False)
+    x_val, y_val = make_arrays(
+        val_df, CLASSES, SAMPLE_RATE, N_MFCC, MAX_FRAMES,
+        training=False, artifact_dir=ARTIFACT_DIR, random_seed=RANDOM_SEED,
+    )
     print("Extracting test features without augmentation...")
-    x_test, y_test = make_arrays(test_df, training=False)
+    x_test, y_test = make_arrays(
+        test_df, CLASSES, SAMPLE_RATE, N_MFCC, MAX_FRAMES,
+        training=False, artifact_dir=ARTIFACT_DIR, random_seed=RANDOM_SEED,
+    )
 
     print(f"train: {x_train.shape}; validation: {x_val.shape}; test: {x_test.shape}")
 
-    model = build_model()
+    model = build_model(
+        max_frames=MAX_FRAMES, n_mfcc=N_MFCC, n_classes=len(CLASSES),
+    )
     model.summary()
     callbacks = [
         ReduceLROnPlateau(

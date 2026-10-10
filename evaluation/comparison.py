@@ -86,6 +86,8 @@ def main() -> None:
                 "Model": MODEL_LABELS.get(r["model"], r["model"]),
                 "Total Parameters": params.get("total", "N/A"),
                 "Trainable Parameters": params.get("trainable", "N/A"),
+                "MACCs": r.get("maccs", "N/A"),
+                "MFLOPs": r.get("mflops", "N/A"),
                 "File Size (KB)": r["size_kb"],
             })
         eff_df = pd.DataFrame(eff_rows)
